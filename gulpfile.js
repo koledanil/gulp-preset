@@ -28,6 +28,8 @@ let ttf2woff = require('gulp-ttf2woff');
 let ttf2woff2 = require('gulp-ttf2woff2');
 let codeMap = require('gulp-sourcemaps');
 
+let gitPage = require('gulp-gh-pages');
+
 // создаем объект описывающий данные для скрипта
 let path = {
   build: {
@@ -181,11 +183,26 @@ gulp.task('fontsConverter', function(){
   .pipe(dest(path.build.fonts))
 })
 
+gulp.task('deploy', function() {
+  return gulp.src('./build/**/*')
+    .pipe(ghPages());
+});
+
+function publishGitPage () {
+  return gulp.src('./build/**/*')
+    .pipe(ghPages());
+}
+
 // оформляем серии для gulp
-let build = gulp.series(destroyBuild, gulp.parallel(jsGo, htmlGo, cssGo, imgGo, spriteMake))
+let build = gulp.series(destroyBuild, gulp.parallel(jsGo, htmlGo, cssGo, imgGo, spriteMake));
 let watch = gulp.parallel(build, watchFiles, browserSyncGo);
 
+let publish = gulp.series((destroyBuild, gulp.parallel(jsGo, htmlGo, cssGo, imgGo, spriteMake), publishGitPage));
+
+
 // оформляем экспорты
+exports.publish = publish;
+exports.gitpage = publishGitPage;
 exports.sprite = spriteMake;
 exports.img = imgGo;
 exports.js = jsGo;
