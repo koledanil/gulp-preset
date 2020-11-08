@@ -1,0 +1,22 @@
+h1 {
+  font-size: 124px;
+  margin-bottom: 0px;
+  color: orange;
+
+  display: flex; // заготовка, чтобы увидеть автопрефиксер
+}
+
+// заготовки, чтобы увидеть группировку медиа
+div {
+  font-size: 30px;
+  @media (max-width: 768px) {
+    font-size: 60px;
+  }
+}
+
+span {
+  font-size: 20px;
+  @media (max-width: 768px) {
+    font-size: 40px;
+  }
+}
