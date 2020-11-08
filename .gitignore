@@ -12,5 +12,4 @@ npm-debug.*
 build/
 Thumbs.db
 build
-build/css
 package-lock.json
