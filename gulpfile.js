@@ -28,7 +28,7 @@ let ttf2woff = require('gulp-ttf2woff');
 let ttf2woff2 = require('gulp-ttf2woff2');
 let codeMap = require('gulp-sourcemaps');
 
-let gitPage = require('gulp-gh-pages');
+let ghPages = require('gulp-gh-pages');
 
 // создаем объект описывающий данные для скрипта
 let path = {
@@ -197,7 +197,8 @@ function publishGitPage () {
 let build = gulp.series(destroyBuild, gulp.parallel(jsGo, htmlGo, cssGo, imgGo, spriteMake));
 let watch = gulp.parallel(build, watchFiles, browserSyncGo);
 
-let publish = gulp.series((destroyBuild, gulp.parallel(jsGo, htmlGo, cssGo, imgGo, spriteMake), publishGitPage));
+// Соберет весь проект и обупдикует в gh-pages (ветка должна быть предварительно создана)
+let publish = gulp.series(build, publishGitPage);
 
 
 // оформляем экспорты
