@@ -1,37 +1,40 @@
 "use strict";
 
 // требуем плагины
-let projectFolder = "build";
-let sourceFolder = "source";
+const projectFolder = "build";
+const sourceFolder = "source";
 
-let plumber = require("gulp-plumber");
-let { src, dest } = require("gulp");
-let gulp = require("gulp");
-let browserSync = require("browser-sync").create();
-let fileInclude = require("gulp-file-include");
-let fileDel = require("del");
-let scssPre = require("gulp-sass");
-let autoPrefixer = require("gulp-autoprefixer");
-let mediaQueryOprimize = require("gulp-group-css-media-queries");
-let cssClean = require("gulp-clean-css");
-let fileRename = require("gulp-rename");
-let jsOpti = require("gulp-uglify-es").default;
-let imgOpti = require("gulp-imagemin");
-let webpConvert = require("gulp-webp");
-let webpInsert = require("gulp-webp-in-html");
-let retinaInsert = require("gulp-img-retina");
-let retinaPrefixDefault = {
+const plumber = require("gulp-plumber");
+const { src, dest } = require("gulp");
+const gulp = require("gulp");
+const browserSync = require("browser-sync").create();
+const fileInclude = require("gulp-file-include");
+const fileDel = require("del");
+const scssPre = require("gulp-sass");
+const autoPrefixer = require("gulp-autoprefixer");
+const mediaQueryOprimize = require("gulp-group-css-media-queries");
+const cssClean = require("gulp-clean-css");
+const fileRename = require("gulp-rename");
+const jsOpti = require("gulp-uglify-es").default;
+const imgOpti = require("gulp-imagemin");
+const webpConvert = require("gulp-webp");
+const webpInsert = require("gulp-webp-in-html");
+const retinaInsert = require("gulp-img-retina");
+const retinaPrefixDefault = {
   suffix: { 1: "", 2: "@2x" }, // префиксы, к-ые будут прописаны ретиной в html
 };
-let svgSpriteMake = require("gulp-svg-sprite");
-let ttf2woff = require("gulp-ttf2woff");
-let ttf2woff2 = require("gulp-ttf2woff2");
-let codeMap = require("gulp-sourcemaps");
+const svgSpriteMake = require("gulp-svg-sprite");
+const svgMin = require("gulp-imagemin");
+const ttf2woff = require("gulp-ttf2woff");
+const ttf2woff2 = require("gulp-ttf2woff2");
+const codeMap = require("gulp-sourcemaps");
 
-let ghPages = require("gulp-gh-pages");
+const ghPages = require("gulp-gh-pages");
+const svgCheerio = require("gulp-cheerio");
+const svgReplace = require("gulp-replace");
 
 // создаем объект описывающий данные для скрипта
-let path = {
+const path = {
   build: {
     html: projectFolder + "/",
     css: projectFolder + "/css/",
@@ -130,7 +133,7 @@ function imgGo() {
   return src(path.source.img)
     .pipe(
       webpConvert({
-        quality: 70,
+        quality: 85,
       })
     )
     .pipe(dest(path.build.img))
@@ -138,9 +141,9 @@ function imgGo() {
     .pipe(
       imgOpti({
         progressive: true,
-        svgoPlugins: [{ removeViewBox: false }],
         interlaced: true,
         optimizationLevel: 0, // от 0 до 7
+        svgoPlugins: [{ removeViewBox: false }],
       })
     )
     .pipe(dest(path.build.img))
@@ -150,17 +153,29 @@ function imgGo() {
 function spriteMake() {
   return src([sourceFolder + "/img/iconsprite/_*.svg"])
     .pipe(
-      imgOpti({
-        svgoPlugins: [{ removeViewBox: false }],
-        optimizationLevel: 3, // от 0 до 7
+      svgMin({
+        js2svg: {
+          pretty: true,
+        },
       })
     )
     .pipe(
+      svgCheerio({
+        run: function ($) {
+          $("[fill]").removeAttr("fill");
+          $("[stroke]").removeAttr("stroke");
+          $("[style]").removeAttr("style");
+        },
+        parserOptions: { xmlMode: true },
+      })
+    )
+    .pipe(svgReplace("&gt", ">"))
+    .pipe(
       svgSpriteMake({
         mode: {
-          stack: {
+          symbol: {
             sprite: "../iconsprite/icons.svg",
-            example: true,
+            // example: true,
           },
         },
       })
